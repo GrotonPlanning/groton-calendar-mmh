@@ -43,7 +43,7 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       min-height: 80px;
-      position: relative;
+      position: relative; /* important for tooltip positioning */
       text-align: right;
       padding: 5px;
       background-color: #fff;
@@ -67,11 +67,14 @@
       color: #666;
     }
 
-    /* Tooltip styling */
+    /* Tooltip inside cell */
     .tooltip {
       display: none;
       position: absolute;
       z-index: 9999;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
       width: 220px;
       background-color: #fff;
       color: #003366;
@@ -96,6 +99,9 @@
     .tooltip a.button:hover {
       background-color: #0055a5;
     }
+    .day:hover .tooltip {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -111,9 +117,6 @@
 </div>
 
 <script>
-  // ===========================
-  // 🗓️ UPDATE EVENTS HERE
-  // ===========================
   const events = [
     {
       date: '2025-11-14',
@@ -129,12 +132,9 @@
       loc: 'Community Center parking lot at 45 Fort Hill Rd.',
       desc: 'Join us for a walking tour exploring the examples of missing middle housing throughout Poquonnock Bridge.',
       link: 'https://arcg.is/0yyqCT'
-    },
+    }
   ];
 
-  // ===========================
-  // ⚙️ CALENDAR LOGIC
-  // ===========================
   let currentMonth = new Date().getMonth();
   let currentYear = new Date().getFullYear();
 
@@ -144,29 +144,10 @@
   const nextBtn = document.getElementById('nextMonth');
   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  function createTooltip(event, eventData) {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
-    tooltip.innerHTML = `
-      <strong>${eventData.title}</strong><br>
-      ${eventData.time}<br>
-      ${eventData.loc}<br><br>
-      <small>${eventData.desc}</small>
-      ${eventData.link ? `<br><a href="${eventData.link}" class="button" target="_blank">More Info</a>` : ''}
-    `;
-    document.body.appendChild(tooltip);
-
-    const rect = event.target.getBoundingClientRect();
-    tooltip.style.top = rect.bottom + window.scrollY + 6 + 'px';
-    tooltip.style.left = rect.left + window.scrollX + rect.width/2 - tooltip.offsetWidth/2 + 'px';
-    tooltip.style.display = 'block';
-
-    return tooltip;
-  }
-
   function renderCalendar(month, year) {
     calendar.innerHTML = '';
 
+    // Add day labels
     dayLabels.forEach(label => {
       const dayLabel = document.createElement('div');
       dayLabel.className = 'calendar-day-label';
@@ -195,13 +176,17 @@
 
       if(eventData) {
         cell.classList.add('has-event');
-        let tooltip;
-        cell.addEventListener('mouseenter', e => {
-          tooltip = createTooltip(e, eventData);
-        });
-        cell.addEventListener('mouseleave', () => {
-          if(tooltip) tooltip.remove();
-        });
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.innerHTML = `
+          <strong>${eventData.title}</strong><br>
+          ${eventData.time}<br>
+          ${eventData.loc}<br><br>
+          <small>${eventData.desc}</small>
+          ${eventData.link ? `<br><a href="${eventData.link}" class="button" target="_blank">More Info</a>` : ''}
+        `;
+        cell.appendChild(tooltip);
       }
 
       calendar.appendChild(cell);
