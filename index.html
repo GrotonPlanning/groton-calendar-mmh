@@ -5,48 +5,32 @@
   <title>Community Events Calendar</title>
   <style>
     body {
-      font-family: "Helvetica", Arial, sans-serif;
-      color: #003366; /* Hub primary dark blue */
+      font-family: Helvetica, Arial, sans-serif;
+      color: #003366;
       margin: 0;
       padding: 20px;
-      background-color: #f9f9f9; /* subtle background */
     }
-
     h2 {
       text-align: center;
-      font-weight: 700;
-      color: #003366;
-      margin-bottom: 20px;
+      font-weight: 600;
     }
-
-    /* Navigation buttons */
     #calendar-nav {
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
-
     #calendar-nav button {
-      background-color: #0055a5; /* Hub accent blue */
-      color: #fff;
+      background: #003366;
+      color: white;
       border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 6px 10px;
+      border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
-      margin: 0 6px;
-      transition: background 0.2s ease;
     }
-
-    #calendar-nav button:hover {
-      background-color: #003366;
-    }
-
     #monthLabel {
+      margin: 0 10px;
       font-weight: 600;
-      font-size: 16px;
     }
-
-    /* Calendar grid */
     #calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -55,52 +39,41 @@
       margin: 0 auto;
       padding: 10px;
     }
-
-    .calendar-day-label {
-      text-align: center;
-      font-weight: 600;
-      color: #666;
-      font-size: 14px;
-    }
-
     .day {
       border: 1px solid #ccc;
-      border-radius: 8px;
+      border-radius: 6px;
       min-height: 80px;
       position: relative;
       text-align: right;
-      padding: 6px;
+      padding: 5px;
       background-color: #fff;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      transition: all 0.2s ease;
     }
-
     .day:hover {
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
       cursor: pointer;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-
     .day.has-event {
-      background-color: #e8f0ff; /* subtle highlight for events */
+      background-color: #e8f0ff;
       border-color: #0055a5;
       font-weight: 600;
     }
-
     .day-number {
       font-size: 14px;
-      margin-bottom: 4px;
+    }
+    .calendar-day-label {
+      text-align: center;
+      font-weight: 500;
+      color: #666;
     }
 
-    /* Tooltip */
+    /* Tooltip styling */
     .tooltip {
       display: none;
-      position: absolute;
-      z-index: 20;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
+      position: absolute; /* dynamically positioned via JS */
+      z-index: 9999; /* above all content */
       width: 220px;
-      background-color: #ffffff;
+      background-color: #fff;
       color: #003366;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -109,18 +82,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       font-size: 13px;
       line-height: 1.4;
-    }
-
-    .day:hover .tooltip {
-      display: block;
-    }
-
-    /* Responsive */
-    @media screen and (max-width: 900px) {
-      #calendar { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media screen and (max-width: 600px) {
-      #calendar { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -174,12 +135,26 @@
   const monthLabel = document.getElementById('monthLabel');
   const prevBtn = document.getElementById('prevMonth');
   const nextBtn = document.getElementById('nextMonth');
-  const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  function createTooltip(event, content) {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.innerHTML = content;
+    document.body.appendChild(tooltip);
+
+    const rect = event.target.getBoundingClientRect();
+    tooltip.style.top = rect.bottom + window.scrollY + 6 + 'px';
+    tooltip.style.left = rect.left + window.scrollX + rect.width/2 - tooltip.offsetWidth/2 + 'px';
+    tooltip.style.display = 'block';
+
+    return tooltip;
+  }
 
   function renderCalendar(month, year) {
     calendar.innerHTML = '';
 
-    // Day headers
+    // Render day headers
     dayLabels.forEach(label => {
       const dayLabel = document.createElement('div');
       dayLabel.className = 'calendar-day-label';
@@ -189,13 +164,14 @@
 
     const firstDay = new Date(year, month, 1);
     const startDay = firstDay.getDay();
-    const daysInMonth = new Date(year, month+1, 0).getDate();
-
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
     monthLabel.textContent = `${firstDay.toLocaleString('default', { month: 'long' })} ${year}`;
 
-    for (let i=0; i<startDay; i++) calendar.appendChild(document.createElement('div'));
+    // Blank cells for first week
+    for(let i = 0; i < startDay; i++) calendar.appendChild(document.createElement('div'));
 
-    for (let day=1; day<=daysInMonth; day++) {
+    // Render days
+    for(let day = 1; day <= daysInMonth; day++) {
       const cell = document.createElement('div');
       cell.className = 'day';
 
@@ -205,14 +181,17 @@
       cell.appendChild(dayNumber);
 
       const dateString = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-      const event = events.find(e => e.date === dateString);
+      const eventData = events.find(e => e.date === dateString);
 
-      if(event) {
+      if(eventData) {
         cell.classList.add('has-event');
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip';
-        tooltip.innerHTML = `<strong>${event.title}</strong><br>${event.time}<br>${event.loc}<br><br><small>${event.desc}</small>`;
-        cell.appendChild(tooltip);
+        let tooltip;
+        cell.addEventListener('mouseenter', e => {
+          tooltip = createTooltip(e, `<strong>${eventData.title}</strong><br>${eventData.time}<br>${eventData.loc}<br><br><small>${eventData.desc}</small>`);
+        });
+        cell.addEventListener('mouseleave', () => {
+          if(tooltip) tooltip.remove();
+        });
       }
 
       calendar.appendChild(cell);
@@ -221,17 +200,17 @@
 
   prevBtn.addEventListener('click', () => {
     currentMonth--;
-    if(currentMonth<0){currentMonth=11;currentYear--;}
-    renderCalendar(currentMonth,currentYear);
+    if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar(currentMonth, currentYear);
   });
 
   nextBtn.addEventListener('click', () => {
     currentMonth++;
-    if(currentMonth>11){currentMonth=0;currentYear++;}
-    renderCalendar(currentMonth,currentYear);
+    if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar(currentMonth, currentYear);
   });
 
-  renderCalendar(currentMonth,currentYear);
+  renderCalendar(currentMonth, currentYear);
 </script>
 
 </body>
