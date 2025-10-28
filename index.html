@@ -70,8 +70,8 @@
     /* Tooltip styling */
     .tooltip {
       display: none;
-      position: absolute; /* dynamically positioned via JS */
-      z-index: 9999; /* above all content */
+      position: absolute;
+      z-index: 9999;
       width: 220px;
       background-color: #fff;
       color: #003366;
@@ -82,6 +82,19 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       font-size: 13px;
       line-height: 1.4;
+    }
+    .tooltip a.button {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 8px;
+      background-color: #003366;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .tooltip a.button:hover {
+      background-color: #0055a5;
     }
   </style>
 </head>
@@ -103,21 +116,20 @@
   // ===========================
   const events = [
     {
-      date: '2025-11-21',
-      title: 'Poquonnock Bridge Missing Middle Walking Tour',
-      time: '3:30 PM – 4:30 PM',
-      loc: 'Town Hall at 45 Fort Hill Rd.',
-      desc: 'Join us for a walking tour of Poqonnock Bridge's missing middle housing.'
-      link: 'https://arcg.is/0yyqCT'
+      date: '2025-11-14',
+      title: 'Town of Groton Missing Middle Housing Inventory Release',
+      time: '12:00 PM',
+      loc: 'Virtual Release',
+      desc: 'Be on the lookout for a new project page featuring the Missing Middle Housing types in Groton',
     },
     {
-      date: '2025-11-14',
-      title: 'Release of Town of Groton Missing Middle Housing Inventory',
-      time: '12:00 PM',
-      loc: 'Virtual',
-      desc: 'Be on the lookout for a new page on our project website with Missing Middle Housing types throughout Town'
+      date: '2025-11-21',
+      title: 'Poquonnock Bridge Missing Middle Housing Walking Tour',
+      time: '3:30 PM – 4:30 PM',
+      loc: 'Community Center parking lot at 45 Fort Hill Rd.',
+      desc: 'Join us for a walking tour exploring the examples of missing middle housing throughout Poquonnock Bridge.',
+      link: 'https://arcg.is/0yyqCT'
     },
-   
   ];
 
   // ===========================
@@ -132,10 +144,16 @@
   const nextBtn = document.getElementById('nextMonth');
   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  function createTooltip(event, content) {
+  function createTooltip(event, eventData) {
     const tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
-    tooltip.innerHTML = content;
+    tooltip.innerHTML = `
+      <strong>${eventData.title}</strong><br>
+      ${eventData.time}<br>
+      ${eventData.loc}<br><br>
+      <small>${eventData.desc}</small>
+      ${eventData.link ? `<br><a href="${eventData.link}" class="button" target="_blank">More Info</a>` : ''}
+    `;
     document.body.appendChild(tooltip);
 
     const rect = event.target.getBoundingClientRect();
@@ -149,7 +167,6 @@
   function renderCalendar(month, year) {
     calendar.innerHTML = '';
 
-    // Render day headers
     dayLabels.forEach(label => {
       const dayLabel = document.createElement('div');
       dayLabel.className = 'calendar-day-label';
@@ -162,10 +179,8 @@
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     monthLabel.textContent = `${firstDay.toLocaleString('default', { month: 'long' })} ${year}`;
 
-    // Blank cells for first week
     for(let i = 0; i < startDay; i++) calendar.appendChild(document.createElement('div'));
 
-    // Render days
     for(let day = 1; day <= daysInMonth; day++) {
       const cell = document.createElement('div');
       cell.className = 'day';
@@ -182,7 +197,7 @@
         cell.classList.add('has-event');
         let tooltip;
         cell.addEventListener('mouseenter', e => {
-          tooltip = createTooltip(e, `<strong>${eventData.title}</strong><br>${eventData.time}<br>${eventData.loc}<br><br><small>${eventData.desc}</small>`);
+          tooltip = createTooltip(e, eventData);
         });
         cell.addEventListener('mouseleave', () => {
           if(tooltip) tooltip.remove();
