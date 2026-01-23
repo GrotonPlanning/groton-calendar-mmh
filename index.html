@@ -43,7 +43,7 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       min-height: 80px;
-      position: relative; /* important for tooltip positioning */
+      position: relative;
       text-align: right;
       padding: 5px;
       background-color: #fff;
@@ -67,7 +67,7 @@
       color: #666;
     }
 
-    /* Tooltip inside cell */
+    /* Tooltip */
     .tooltip {
       display: none;
       position: absolute;
@@ -117,13 +117,16 @@
 </div>
 
 <script>
+  // ===========================
+  // 🗓️ UPDATE EVENTS HERE
+  // ===========================
   const events = [
     {
       date: '2025-11-14',
       title: 'Town of Groton Missing Middle Housing Inventory Release',
       time: '12:00 PM',
       loc: 'Virtual Release',
-      desc: 'Be on the lookout for a new project page featuring the Missing Middle Housing types in Groton',
+      desc: 'Be on the lookout for a new project page featuring the Missing Middle Housing types in Groton'
     },
     {
       date: '2025-11-21',
@@ -132,30 +135,33 @@
       loc: 'Community Center parking lot at 45 Fort Hill Rd.',
       desc: 'RSVP below to join us for a walking tour of Poquonnock Bridge.',
       link: 'https://arcg.is/0yyqCT'
-    }
-        {
+    },
+    {
       date: '2026-02-26',
       title: 'Community Conversations: An Introduction to Missing Middle Housing',
       time: '5:30 PM – 7:30 PM',
       loc: 'Groton Middle School',
-      desc: 'Join us to learn about Missing Middle Housing and the Meeting in the Middle project.',
-    }
-          {
+      desc: 'Join us to learn about Missing Middle Housing and the Meeting in the Middle project.'
+    },
+    {
       date: '2026-03-05',
       title: 'Missing Middle Housing Walking Tour',
       time: '4:00 PM – 5:00 PM',
       loc: 'Meet at Factory Square courtyard, 12 Water Street.',
-      desc: 'Come explore Missing Middle Housing in Mystic during our third walking tour.',
-    }
-            {
+      desc: 'Come explore Missing Middle Housing in Mystic during our third walking tour.'
+    },
+    {
       date: '2026-03-26',
       title: 'Meeting in the Middle Public Meeting',
       time: '5:30 PM – 7:30 PM',
       loc: 'Thrive 55+, 52 Newtown Road.',
-      desc: 'The project consultants will present a series of "Opportunity Sites" to illustrate how Missing Middle Housing may fit into Groton.',
+      desc: 'The project consultants will present a series of "Opportunity Sites" to illustrate how Missing Middle Housing may fit into Groton.'
     }
   ];
 
+  // ===========================
+  // ⚙️ CALENDAR LOGIC
+  // ===========================
   let currentMonth = new Date().getMonth();
   let currentYear = new Date().getFullYear();
 
@@ -168,7 +174,7 @@
   function renderCalendar(month, year) {
     calendar.innerHTML = '';
 
-    // Add day labels
+    // Day headers
     dayLabels.forEach(label => {
       const dayLabel = document.createElement('div');
       dayLabel.className = 'calendar-day-label';
@@ -179,11 +185,16 @@
     const firstDay = new Date(year, month, 1);
     const startDay = firstDay.getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+
     monthLabel.textContent = `${firstDay.toLocaleString('default', { month: 'long' })} ${year}`;
 
-    for(let i = 0; i < startDay; i++) calendar.appendChild(document.createElement('div'));
+    // Empty cells before month start
+    for (let i = 0; i < startDay; i++) {
+      calendar.appendChild(document.createElement('div'));
+    }
 
-    for(let day = 1; day <= daysInMonth; day++) {
+    // Days
+    for (let day = 1; day <= daysInMonth; day++) {
       const cell = document.createElement('div');
       cell.className = 'day';
 
@@ -192,10 +203,10 @@
       dayNumber.textContent = day;
       cell.appendChild(dayNumber);
 
-      const dateString = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const dateString = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
       const eventData = events.find(e => e.date === dateString);
 
-      if(eventData) {
+      if (eventData) {
         cell.classList.add('has-event');
 
         const tooltip = document.createElement('div');
@@ -216,13 +227,13 @@
 
   prevBtn.addEventListener('click', () => {
     currentMonth--;
-    if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
     renderCalendar(currentMonth, currentYear);
   });
 
   nextBtn.addEventListener('click', () => {
     currentMonth++;
-    if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
     renderCalendar(currentMonth, currentYear);
   });
 
